@@ -1,5 +1,5 @@
 QT       += core gui
-
+QT       += network
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 CONFIG += c++11
@@ -9,14 +9,22 @@ CONFIG += c++11
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    clientwait.cpp \
     main.cpp \
-    mainwidget.cpp
+    mainwidget.cpp \
+    mytcpsocket.cpp \
+    serverwait.cpp
 
 HEADERS += \
-    mainwidget.h
+    clientwait.h \
+    mainwidget.h \
+    mytcpsocket.h \
+    serverwait.h
 
 FORMS += \
-    mainwidget.ui
+    clientwait.ui \
+    mainwidget.ui \
+    serverwait.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
