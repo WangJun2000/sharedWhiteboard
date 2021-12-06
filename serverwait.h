@@ -2,8 +2,11 @@
 #define SERVERWAIT_H
 
 #include <QWidget>
+#include <QTcpServer>
 #include <QHostAddress>
-#include "mytcpsocket.h"
+#include <QString>
+
+#include "whiteboard.h"
 
 namespace Ui {
 class ServerWait;
@@ -30,7 +33,16 @@ signals:
 
 private:
     Ui::ServerWait *ui;
-    MyTcpSocket *myTcpSocket;
+    QTcpServer *myTcpServer;
+    QTcpSocket *myTcpServerConnection;
+    //白板对象
+    WhiteBoard *myWhiteBoard;
+
+    QString getHostIpAddress();
+
+private slots:
+    void handleNewConnection();
+    void displayError(QAbstractSocket::SocketError socketError);
 };
 
 #endif // SERVERWAIT_H

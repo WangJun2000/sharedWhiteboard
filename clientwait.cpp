@@ -8,12 +8,15 @@ ClientWait::ClientWait(QWidget *parent) :
     ui(new Ui::ClientWait)
 {
     ui->setupUi(this);
+    this->setAttribute(Qt::WA_DeleteOnClose);
     this->setWindowTitle("waiting for input!");
 
     //初始化
+    myTcpSocket = new QTcpSocket(0);
+    myWhiteBoard = nullptr;
 
-    //绑定TCP地址与端口
-    // if(myTcpSocket->bind(QHostAddress::AnyIPv4))
+    //绑定TCP地址与端口,QTcpSocket不支持bind,不知道为什么
+    // if(myTcpSocket->bind(QHostAddress::LocalHost))
     // {
         // qDebug()<<"绑定成功";
         // qDebug()<<"IP:"<<myTcpSocket->localAddress().toString();
@@ -22,7 +25,7 @@ ClientWait::ClientWait(QWidget *parent) :
     // else{
         // qDebug()<<"绑定失败";
         // qDebug()<<myTcpSocket->errorString();
-    //     }
+        // }
 
     //信号与槽
     //返回按钮
@@ -36,11 +39,33 @@ ClientWait::ClientWait(QWidget *parent) :
 
 void ClientWait::okButtonClicked(){
     serverIP = ui->ipInput->text();
-    serverPort = ui->portInput->text();
+    serverPort = ui->portInput->text().toInt();
     qDebug()<<"ok is clicked";
-    qDebug()<<"serverIP:"+serverIP<<"serverPort:"+serverPort;
+    qDebug()<<"serverIP:"<<serverIP<<"serverPort:"<<serverPort;
+    myTcpSocket->connectToHost(serverIP,serverPort);
+    //等待10s,直到建立连接
+    if(myTcpSocket->waitForConnected(10000)){
+        qDebug()<<"connect successful!";
+        qDebug()<<"my port:"<<myTcpSocket->localPort();
+        connect(myTcpSocket,SIGNAL(error(QAbstractSocket::SocketError)),this,SLOT(displayError(QAbstractSocket::SocketError)));
+        myWhiteBoard = new WhiteBoard(0,myTcpSocket);
+        myWhiteBoard->setWindowIcon(QIcon(":/png/images/1.png"));
+        myWhiteBoard->show();
+        this->hide();
+    }
+    else{
+        qDebug()<<"connect wrong:"<<myTcpSocket->errorString();
+    }
 }
 
+void ClientWait::displayError(QAbstractSocket::SocketError socketError)
+{
+    Q_UNUSED(socketError)
+    qDebug()<<myTcpSocket->errorString();
+    myTcpSocket->close();
+    myWhiteBoard->close();
+    this->close();
+}
 ClientWait::~ClientWait()
 {
     delete ui;

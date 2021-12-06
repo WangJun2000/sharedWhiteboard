@@ -4,7 +4,6 @@
 #include <QWidget>
 #include "serverwait.h"
 #include "clientwait.h"
-#include "mytcpsocket.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWidget; }

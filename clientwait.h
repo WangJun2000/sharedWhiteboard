@@ -3,7 +3,9 @@
 
 #include <QWidget>
 #include <QString>
-#include "mytcpsocket.h"
+#include <QTcpSocket>
+
+#include "whiteboard.h"
 
 namespace Ui {
 class ClientWait;
@@ -22,10 +24,14 @@ signals:
 
 private:
     Ui::ClientWait *ui;
-    MyTcpSocket *myTcpSocket;
+    QTcpSocket *myTcpSocket;
     QString serverIP;
-    QString serverPort;
+    int serverPort;
+    WhiteBoard *myWhiteBoard;
+
+private slots:
     void okButtonClicked();
+    void displayError(QAbstractSocket::SocketError socketError);
 };
 
 #endif // CLIENTWAIT_H

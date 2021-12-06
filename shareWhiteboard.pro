@@ -12,14 +12,16 @@ SOURCES += \
     clientwait.cpp \
     main.cpp \
     mainwidget.cpp \
-    mytcpsocket.cpp \
-    serverwait.cpp
+    sendtimer.cpp \
+    serverwait.cpp \
+    whiteboard.cpp
 
 HEADERS += \
     clientwait.h \
     mainwidget.h \
-    mytcpsocket.h \
-    serverwait.h
+    sendtimer.h \
+    serverwait.h \
+    whiteboard.h
 
 FORMS += \
     clientwait.ui \
@@ -30,3 +32,6 @@ FORMS += \
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
+
+RESOURCES += \
+    images.qrc

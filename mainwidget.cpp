@@ -10,6 +10,8 @@ MainWidget::MainWidget(QWidget *parent)
     this->setAttribute(Qt::WA_DeleteOnClose,false);
 
     //初始化
+    serverWaitWidget = nullptr;
+    clientWaitWidget = nullptr;
 
     //信号与槽的连接
     connect(ui->serverButton,&QPushButton::clicked,this,&MainWidget::serverButtonClicked);
@@ -22,15 +24,15 @@ MainWidget::MainWidget(QWidget *parent)
 void MainWidget::serverButtonClicked(){
     this->hide();
 
-    if (serverWaitWidget != NULL)
-        delete serverWaitWidget;
+    // if (serverWaitWidget != NULL)
+        // delete serverWaitWidget;
 
     serverWaitWidget = new ServerWait(0);
 
     //返回到主窗口
     connect(serverWaitWidget,&ServerWait::backSignal,[=](){
-       serverWaitWidget->close();
        this->show();
+       serverWaitWidget->close();
     });
 
     serverWaitWidget->show();
@@ -39,8 +41,9 @@ void MainWidget::serverButtonClicked(){
 void MainWidget::clientButtonClicked(){
     this->hide();
 
-    if (clientWaitWidget != NULL)
-        delete clientWaitWidget;
+    // if (clientWaitWidget != NULL)
+        // delete clientWaitWidget;
+
     clientWaitWidget = new ClientWait(0);
 
      //返回到主窗口
