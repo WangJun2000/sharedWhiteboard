@@ -15,8 +15,11 @@
 #include <QMenu>
 #include <QFileDialog>
 #include <QTextEdit>
-#include "sendtimer.h"
+#include <QTextBrowser>
+#include <QDateTime>
+#include <QPushButton>
 
+#include "sendtimer.h"
 
 class WhiteBoard : public QMainWindow
 {
@@ -29,6 +32,9 @@ public:
 private:
     QTcpSocket *myTcpSocket;
     SendTimer *mySendTimer;
+    QTextBrowser *msgBrowser;
+    QTextEdit *msgEdit;
+    QPushButton *sendButton;
 
 protected:
     void paintEvent(QPaintEvent *);//重写窗体重绘事件

@@ -7,6 +7,7 @@
 #include <QString>
 
 #include "whiteboard.h"
+#include "receiveoption.h"
 
 namespace Ui {
 class ServerWait;
@@ -37,6 +38,7 @@ private:
     QTcpSocket *myTcpServerConnection;
     //白板对象
     WhiteBoard *myWhiteBoard;
+    ReceiveOption *myReceiveOption;
 
     QString getHostIpAddress();
 

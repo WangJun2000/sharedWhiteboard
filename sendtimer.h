@@ -8,6 +8,8 @@
 #include <QJsonObject>
 #include <QJsonValue>
 #include <QJsonDocument>
+#include <QByteArray>
+#include <QDataStream>
 
 class SendTimer : public QObject
 {

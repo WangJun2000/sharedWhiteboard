@@ -14,6 +14,7 @@ ServerWait::ServerWait(QWidget *parent) :
     myTcpServer = new QTcpServer(0);
     myTcpServerConnection = nullptr;
     myWhiteBoard = nullptr;
+    myReceiveOption = nullptr;
     //监听在某一个端口
     if(!myTcpServer->listen(QHostAddress::AnyIPv4)){
         qDebug()<<myTcpServer->errorString();
@@ -43,10 +44,9 @@ QString ServerWait::getHostIpAddress()
     int nListSize = ipAddressesList.size();
     for (int i = 0; i < nListSize; ++i)
     {
-           if (ipAddressesList.at(i) != QHostAddress::LocalHost &&
-               ipAddressesList.at(i).toIPv4Address()) {
-               strIpAddress = ipAddressesList.at(i).toString();
-               break;
+           if (ipAddressesList.at(i).toIPv4Address()) {
+               strIpAddress += ipAddressesList.at(i).toString();
+               strIpAddress += " ";
            }
      }
      // 如果没有找到，则以本地IP地址为IP
@@ -60,6 +60,7 @@ void ServerWait::handleNewConnection()
 {
     myTcpServerConnection =myTcpServer->nextPendingConnection();
     myWhiteBoard = new WhiteBoard(0,myTcpServerConnection);
+    myReceiveOption = new ReceiveOption(0,myTcpServerConnection,myWhiteBoard);
     myWhiteBoard->setWindowIcon(QIcon(":/png/images/1.png"));
     this->hide();
     //如果发生错误,就打印出来

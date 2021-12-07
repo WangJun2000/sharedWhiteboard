@@ -11,6 +11,10 @@ WhiteBoard::WhiteBoard(QWidget *parent, QTcpSocket *_myTcpSocket) :
     //100ms一次
     mySendTimer = new SendTimer(0,myTcpSocket,100);
 
+    //test
+    mySendTimer->sendJsonObject.insert("draw","12");
+    mySendTimer->sendJsonObject.insert("drawline",false);
+
     _lpress = false;//初始鼠标左键未按下
     _drawType = 0;//初始为什么都不画
     _drag = 0;//默认非拖拽模式
@@ -19,9 +23,11 @@ WhiteBoard::WhiteBoard(QWidget *parent, QTcpSocket *_myTcpSocket) :
     _tEdit = new QTextEdit(this);//初始化文本输入框
     _tEdit->hide();//隐藏
 
+    //获取设备分辨率
     QScreen *screen=QGuiApplication::primaryScreen ();
     QRect deskRect=screen->availableGeometry() ;
     this->setGeometry(deskRect);//设置窗体大小、位置
+    this->setFixedSize(this->width(),this->height());
     setMouseTracking(true);//开启鼠标实时追踪，监听鼠标移动事件，默认只有按下时才监听
 
     //设置背景颜色
@@ -88,6 +94,26 @@ WhiteBoard::WhiteBoard(QWidget *parent, QTcpSocket *_myTcpSocket) :
     connect(openAction, SIGNAL(triggered()), this, SLOT(OpenPic()));
     connect(textAction, SIGNAL(triggered()), this, SLOT(Texts()));
     connect(_tEdit, SIGNAL(textChanged()), this, SLOT(AddTexts()));
+
+
+    //创建聊天框
+    msgBrowser = new QTextBrowser(this);
+    msgBrowser->setGeometry(this->height(),30,this->width()-this->height()-10,this->height()*2/3-30);
+    // msgBrowser->setStyleSheet("background-color:gray;");   //test
+    msgBrowser->setTextColor(Qt::blue);
+    QString time = QDateTime::currentDateTime().toString();
+    msgBrowser->append("[我]"+time);
+
+    //输入框
+    msgEdit = new QTextEdit(this);
+    msgEdit->setGeometry(this->height(),this->height()*2/3+10,this->width()-this->height()-10,this->height()/3 -100);
+
+    //发送按钮
+    sendButton = new QPushButton(this);
+    sendButton->setText("发送");
+    sendButton->setStyleSheet("background-color: rgb(255, 255, 255);");
+    sendButton->setGeometry(this->height(),this->height()-80,this->width()-this->height()-10,30);
+
 
 }
 

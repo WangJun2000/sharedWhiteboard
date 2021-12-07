@@ -6,6 +6,7 @@
 #include <QTcpSocket>
 
 #include "whiteboard.h"
+#include "receiveoption.h"
 
 namespace Ui {
 class ClientWait;
@@ -28,6 +29,7 @@ private:
     QString serverIP;
     int serverPort;
     WhiteBoard *myWhiteBoard;
+    ReceiveOption *myReceiveOption;
 
 private slots:
     void okButtonClicked();

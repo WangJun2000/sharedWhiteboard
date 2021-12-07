@@ -14,6 +14,7 @@ ClientWait::ClientWait(QWidget *parent) :
     //初始化
     myTcpSocket = new QTcpSocket(0);
     myWhiteBoard = nullptr;
+    myReceiveOption = nullptr;
 
     //绑定TCP地址与端口,QTcpSocket不支持bind,不知道为什么
     // if(myTcpSocket->bind(QHostAddress::LocalHost))
@@ -49,6 +50,7 @@ void ClientWait::okButtonClicked(){
         qDebug()<<"my port:"<<myTcpSocket->localPort();
         connect(myTcpSocket,SIGNAL(error(QAbstractSocket::SocketError)),this,SLOT(displayError(QAbstractSocket::SocketError)));
         myWhiteBoard = new WhiteBoard(0,myTcpSocket);
+        myReceiveOption = new ReceiveOption(0,myTcpSocket,myWhiteBoard);
         myWhiteBoard->setWindowIcon(QIcon(":/png/images/1.png"));
         myWhiteBoard->show();
         this->hide();

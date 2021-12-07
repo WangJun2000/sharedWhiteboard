@@ -12,6 +12,7 @@ SOURCES += \
     clientwait.cpp \
     main.cpp \
     mainwidget.cpp \
+    receiveoption.cpp \
     sendtimer.cpp \
     serverwait.cpp \
     whiteboard.cpp
@@ -19,6 +20,7 @@ SOURCES += \
 HEADERS += \
     clientwait.h \
     mainwidget.h \
+    receiveoption.h \
     sendtimer.h \
     serverwait.h \
     whiteboard.h
