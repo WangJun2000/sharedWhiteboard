@@ -135,14 +135,16 @@ void WhiteBoard::msgBrowserAppend(bool isLocal, QString msg){
 }
 
 void WhiteBoard::sendButtonClicked(){
-    if (sendButton->text() != ""){
-        msgBrowserAppend(true,msgEdit->toPlainText());
-        mySendTimer->sendMsg(msgEdit->toPlainText());
+    QString msg = msgEdit->toPlainText();
+    if ( msg != ""){
+        msgBrowserAppend(true,msg);
+        mySendTimer->sendMsg(msg);
         msgEdit->clear();
         msgEdit->setFocus();
     }
     else{
         qDebug()<<"发送消息为空";
+        msgEdit->setFocus();
     }
 }
 
