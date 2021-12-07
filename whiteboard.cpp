@@ -12,8 +12,8 @@ WhiteBoard::WhiteBoard(QWidget *parent, QTcpSocket *_myTcpSocket) :
     mySendTimer = new SendTimer(0,myTcpSocket,100);
 
     //test
-    mySendTimer->sendJsonObject.insert("draw","12");
-    mySendTimer->sendJsonObject.insert("drawline",false);
+    // mySendTimer->sendJsonObject.insert("draw","12");
+    // mySendTimer->sendJsonObject.insert("drawline",false);
 
     _lpress = false;//初始鼠标左键未按下
     _drawType = 0;//初始为什么都不画
@@ -99,10 +99,11 @@ WhiteBoard::WhiteBoard(QWidget *parent, QTcpSocket *_myTcpSocket) :
     //创建聊天框
     msgBrowser = new QTextBrowser(this);
     msgBrowser->setGeometry(this->height(),30,this->width()-this->height()-10,this->height()*2/3-30);
-    // msgBrowser->setStyleSheet("background-color:gray;");   //test
-    msgBrowser->setTextColor(Qt::blue);
-    QString time = QDateTime::currentDateTime().toString();
-    msgBrowser->append("[我]"+time);
+    // msgBrowser->setStyleSheet("background-color:gray;");
+    //test
+    // msgBrowser->setTextColor(Qt::blue);
+    // QString time = QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss");
+    // msgBrowser->append("[我]"+time);
 
     //输入框
     msgEdit = new QTextEdit(this);
@@ -114,7 +115,35 @@ WhiteBoard::WhiteBoard(QWidget *parent, QTcpSocket *_myTcpSocket) :
     sendButton->setStyleSheet("background-color: rgb(255, 255, 255);");
     sendButton->setGeometry(this->height(),this->height()-80,this->width()-this->height()-10,30);
 
+    //发送的信号与槽
+    connect(sendButton,&QPushButton::clicked,this,&WhiteBoard::sendButtonClicked);
 
+
+}
+
+void WhiteBoard::msgBrowserAppend(bool isLocal, QString msg){
+    QString time = QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss");
+    msgBrowser->setTextColor(Qt::blue);
+    if( isLocal ){
+        msgBrowser->append("[我]"+time);
+    }
+    else{
+        msgBrowser->append("[对方]"+time);
+    }
+    msgBrowser->setTextColor(Qt::black);
+    msgBrowser->append(msg);
+}
+
+void WhiteBoard::sendButtonClicked(){
+    if (sendButton->text() != ""){
+        msgBrowserAppend(true,msgEdit->toPlainText());
+        mySendTimer->sendMsg(msgEdit->toPlainText());
+        msgEdit->clear();
+        msgEdit->setFocus();
+    }
+    else{
+        qDebug()<<"发送消息为空";
+    }
 }
 
 void WhiteBoard::paintEvent(QPaintEvent *)

@@ -38,31 +38,49 @@ void ReceiveOption::readJson()
     if ((bytesReceived == totalBytes) && (bytesReceived != 0)){
         bytesReceived = 0;
         totalBytes = 0;
-        myJsonDoc = QJsonDocument::fromJson(receiveJsonByteArray);
-        if (myJsonDoc.isObject()){
+
+        QJsonParseError jsonError;
+        myJsonDoc = QJsonDocument::fromJson(receiveJsonByteArray,&jsonError);
+        if (myJsonDoc.isObject() && jsonError.error == QJsonParseError::NoError){
             myJsonObject = myJsonDoc.object();
             //test
-            QStringList keys = myJsonObject.keys();
-            for(int i=0; i<keys.size(); ++i)
-            {
-                QString key = keys.at(i);
-                QJsonValue value = myJsonObject.value(key);
-                if(value.isBool())
-                {
-                qDebug() << key << ":" << value.toBool();
-                }
-                if(value.isString())
-                {
-                qDebug() << key << ":" << value.toString();
-                }
-                if(value.isDouble())
-                {
-                qDebug() << key << ":" << value.toInt();
-                }
-            }
+            // QStringList keys = myJsonObject.keys();
+            // for(int i=0; i<keys.size(); ++i)
+            // {
+                // QString key = keys.at(i);
+                // QJsonValue value = myJsonObject.value(key);
+                // if(value.isBool())
+                // {
+                // qDebug() << key << ":" << value.toBool();
+                // }
+                // if(value.isString())
+                // {
+                // qDebug() << key << ":" << value.toString();
+                // }
+                // if(value.isDouble())
+                // {
+                // qDebug() << key << ":" << value.toInt();
+                // }
+            //             }
+            handleJson(myJsonObject);
+            //清空缓存
+            myJsonObject = QJsonObject();
+            receiveJsonByteArray.clear();
         }
         else{
             qDebug()<<"接收到错误类型数据";
+            qDebug()<<jsonError.errorString();
+            qDebug()<<receiveJsonByteArray;
+        }
+    }
+}
+
+void ReceiveOption::handleJson(QJsonObject comeJson){
+    if (comeJson.contains("msg")){
+        QJsonArray msgArray = comeJson.value("msg").toArray();
+
+        for (int i=0; i<msgArray.size(); i++){
+            myWhiteBoard->msgBrowserAppend(false,msgArray[i].toString());
         }
     }
 }

@@ -36,6 +36,12 @@ private:
     QTextEdit *msgEdit;
     QPushButton *sendButton;
 
+public:
+    void msgBrowserAppend(bool isLocal,QString msg);
+
+private slots:
+    void sendButtonClicked();
+
 protected:
     void paintEvent(QPaintEvent *);//重写窗体重绘事件
     void mousePressEvent(QMouseEvent *);//重写鼠标按下事件

@@ -18,6 +18,8 @@ public:
     explicit SendTimer(QObject *parent, QTcpSocket *myTcpSocket, quint16 interval);
     QJsonObject sendJsonObject;
 
+    void sendMsg(QString msg);
+
 signals:
 
 private:

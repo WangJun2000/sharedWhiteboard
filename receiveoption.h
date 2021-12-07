@@ -33,6 +33,7 @@ private:
 
 private slots:
     void readJson();
+    void handleJson(QJsonObject comeJson);
 };
 
 #endif // RECEIVEOPTION_H

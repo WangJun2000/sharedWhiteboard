@@ -12,12 +12,26 @@ SendTimer::SendTimer(QObject *parent, QTcpSocket *_myTcpSocket, quint16 _interva
     connect(myTimer,&QTimer::timeout,this,&SendTimer::sendJson);
 }
 
+void SendTimer::sendMsg(QString msg){
+    if (sendJsonObject.contains("msg")){
+        sendJsonObject.value("msg").toArray().append(msg);
+    }
+    else{
+        QJsonArray msgArray;
+        msgArray.append(msg);
+        sendJsonObject.insert("msg",msgArray);
+    }
+
+}
+
 void SendTimer::sendJson(){
     //判断TCP连接状态
     if(myTcpSocket->state() == QAbstractSocket::ConnectedState){
         // qDebug()<<"定时器tick";
         //判断json对象是否是空的
         if(!sendJsonObject.isEmpty()){
+            //打印一下
+            qDebug()<<sendJsonObject;
 
             QJsonDocument doc(sendJsonObject);
             QByteArray json = doc.toJson();
@@ -34,6 +48,8 @@ void SendTimer::sendJson(){
 
             //本体
             myTcpSocket->write(json);
+
+
             //清空json
             sendJsonObject = QJsonObject();
         }
