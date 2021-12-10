@@ -22,6 +22,7 @@ WhiteBoard::WhiteBoard(QWidget *parent, QTcpSocket *_myTcpSocket) :
     _openflag = 0;//初始不打开图片
     _tEdit = new QTextEdit(this);//初始化文本输入框
     _tEdit->hide();//隐藏
+    this->setFocusPolicy(Qt::StrongFocus);
 
     //获取设备分辨率
     QScreen *screen=QGuiApplication::primaryScreen ();
@@ -188,6 +189,37 @@ void WhiteBoard::paintEvent(QPaintEvent *)
             i5++;
         }
     }
+    unsigned int i1_rt=0,i2_rt=0,i3_rt=0,i4_rt=0,i5_rt=0;//各种图形的索引
+
+    for(int c_rt = 0;c_rt<_shape_remote.size();++c_rt)//控制远程用户当前所绘图形总数
+    {
+        if(_shape_remote.at(c_rt) == 1)//线条
+        {
+              const QVector<QPoint>& line = _lines_remote.at(i1_rt++);//取出一条线条
+              for(int j=0; j<line.size()-1; ++j)//将线条的所有线段描绘出
+              {
+                  p.drawLine(line.at(j), line.at(j+1));
+              }
+        }
+        else if(_shape_remote.at(c_rt) == 2)//矩形
+        {
+             p.drawRect(_rects_remote.at(i2_rt++));
+        }
+        else if(_shape_remote.at(c_rt) == 3)//椭圆
+        {
+            p.drawEllipse(_ellipse_remote.at(i3_rt++));
+        }
+        else if(_shape_remote.at(c_rt) == 4)//直线
+        {
+            p.drawLine(_line_remote.at(i4_rt).topLeft(),_line_remote.at(i4_rt).bottomRight());
+            i4_rt++;
+        }
+        else if(_shape_remote.at(c_rt) == 5)//文本
+        {
+            p.drawText(_tpoint_remote.at(i5_rt),_text_remote.at(i5_rt));
+            i5_rt++;
+        }
+    }
     p.end();
     p.begin(this);//将当前窗体作为画布
     p.drawPixmap(0,0, pix);//将pixmap画到窗体
@@ -204,7 +236,9 @@ void WhiteBoard::mousePressEvent(QMouseEvent *e)
             _lines.append(line);//将新线条添加到线条集合
             QVector<QPoint>& lastLine = _lines.last();//拿到新线条
             lastLine.append(e->pos());//记录鼠标的坐标(新线条的开始坐标)
+            mySendTimer->sendLines(true,e->pos().x()/(double)this->height(),e->pos().y()/(double)this->height());
             _shape.append(1);
+
         }
         else if(_drawType == 2)//矩形
         {
@@ -215,6 +249,7 @@ void WhiteBoard::mousePressEvent(QMouseEvent *e)
                 _rects.append(rect);//将新矩形添加到矩形集合
                 QRect& lastRect = _rects.last();//拿到新矩形
                 lastRect.setTopLeft(e->pos());//记录鼠标的坐标(新矩形的左上角坐标)
+                mySendTimer->sendRects(true,e->pos().x()/(double)this->height(),e->pos().y()/(double)this->height());
                  _shape.append(2);
             }
             else if(_rects.last().contains(e->pos()))//拖拽模式、如果在矩形内按下
@@ -233,6 +268,7 @@ void WhiteBoard::mousePressEvent(QMouseEvent *e)
                 _ellipse.append(rect);//将新椭圆添加到椭圆集合
                 QRect& lastEllipse = _ellipse.last();//拿到新椭圆
                 lastEllipse.setTopLeft(e->pos());//记录鼠标的坐标(新椭圆的左上角坐标)
+                mySendTimer->sendEllipse(true,e->pos().x()/(double)this->height(),e->pos().y()/(double)this->height());
                  _shape.append(3);
             }
             else if(_ellipse.last().contains(e->pos()))//如果在椭圆内按下
@@ -248,6 +284,7 @@ void WhiteBoard::mousePressEvent(QMouseEvent *e)
             _line.append(rect);//将新直线添加到直线集合
             QRect& lastLine = _line.last();//拿到新直线
             lastLine.setTopLeft(e->pos());//记录鼠标的坐标(新直线开始一端坐标)
+            mySendTimer->sendLine(true,e->pos().x()/(double)this->height(),e->pos().y()/(double)this->height());
             _shape.append(4);
         }
         else if(_drawType == 5)//文字
@@ -261,6 +298,7 @@ void WhiteBoard::mousePressEvent(QMouseEvent *e)
 
             _tEdit->show();//显示文本输入框
             _text.append("");//添加文本到文本集合
+            mySendTimer->sendText(true,lastp.x()/(double)this->height(),lastp.y()/(double)this->height(),"");
             _tEdit->clear();//因为全局只有一个，所以使用之前要清空
             _shape.append(5);
         }
@@ -272,6 +310,7 @@ void WhiteBoard::AddTexts()//当输入框文本改变时调用
 {
     QString& last = _text.last();//拿到最后一个文本
     last = _tEdit->toPlainText();//将输入框文本作为文本
+    mySendTimer->sendText(false,-1,-1,last);
 }
 
 void WhiteBoard::mouseMoveEvent(QMouseEvent *e)
@@ -294,6 +333,7 @@ void WhiteBoard::mouseMoveEvent(QMouseEvent *e)
             if(_lines.size()<=0) return;//线条集合为空，不画线
             QVector<QPoint>& lastLine = _lines.last();//最后添加的线条，就是最新画的
             lastLine.append(e->pos());//记录鼠标的坐标(线条的轨迹)
+            mySendTimer->sendLines(false,e->pos().x()/(double)this->height(),e->pos().y()/(double)this->height());
             update();//触发窗体重绘
         }
         else if(_drawType == 2)
@@ -302,6 +342,7 @@ void WhiteBoard::mouseMoveEvent(QMouseEvent *e)
             {
                 QRect& lastRect = _rects.last();//拿到新矩形
                 lastRect.setBottomRight(e->pos());//更新矩形的右下角坐标
+                mySendTimer->sendRects(false,e->pos().x()/(double)this->height(),e->pos().y()/(double)this->height());
             }
             else//拖拽模式
             {
@@ -311,6 +352,7 @@ void WhiteBoard::mouseMoveEvent(QMouseEvent *e)
                     int dx = e->pos().x()-_begin.x();//横向移动x
                     int dy = e->pos().y()-_begin.y();//纵向移动y
                     lastRect = lastRect.adjusted(dx,dy,dx,dy);//更新矩形的位置
+                    mySendTimer->sendMove(2,dx/(double)this->height(),dy/(double)this->height());
                     _begin = e->pos();//刷新拖拽点起始坐标
                 }
 
@@ -324,6 +366,7 @@ void WhiteBoard::mouseMoveEvent(QMouseEvent *e)
             {
                 QRect& lastEllipse = _ellipse.last();//拿到新椭圆
                 lastEllipse.setBottomRight(e->pos());//更新椭圆的右下角坐标)
+                mySendTimer->sendEllipse(false,e->pos().x()/(double)this->height(),e->pos().y()/(double)this->height());
 
             }
             else//拖拽
@@ -334,6 +377,7 @@ void WhiteBoard::mouseMoveEvent(QMouseEvent *e)
                     int dx = e->pos().x()-_begin.x();//横向移动x
                     int dy = e->pos().y()-_begin.y();//纵向移动y
                     lastEllipse = lastEllipse.adjusted(dx,dy,dx,dy);
+                    mySendTimer->sendMove(3,dx/(double)this->height(),dy/(double)this->height());
                     _begin = e->pos();//刷新拖拽点起始坐标
                 }
 
@@ -344,6 +388,7 @@ void WhiteBoard::mouseMoveEvent(QMouseEvent *e)
         {
             QRect& lastLine = _line.last();//拿到新直线
             lastLine.setBottomRight(e->pos());//更新直线另一端)
+            mySendTimer->sendLine(false,e->pos().x()/(double)this->height(),e->pos().y()/(double)this->height());
             update();//触发窗体重绘
         }
     }
@@ -455,8 +500,38 @@ void WhiteBoard::OpenPic()
         QPainter p(&_pixmap);
         p.drawPixmap(0,30,pix);//添加工具栏的空间
         _openflag = 1;//设置文件打开标志
+
+        //传递给远程打开
+        mySendTimer->sendPic(pixmapTostring(pix));
         update();//触发窗体重绘，将图片画到窗体
     }
+}
+
+void WhiteBoard::remoteOpenpic(QString pic){
+    qDebug()<<"收到远程图片";
+    QPixmap pix = stringTopixmap(pic);
+    QPainter p(&_pixmap);
+    p.drawPixmap(0,30,pix);//添加工具栏的空间
+    _openflag = 1;//设置文件打开标志
+    update();
+}
+
+QString WhiteBoard::pixmapTostring( const QPixmap& pixmap )
+{
+  QByteArray byte_array;
+  QDataStream data_stream(&byte_array,QIODevice::WriteOnly);
+  data_stream<<pixmap;
+  QString res = QString::fromLocal8Bit(byte_array.toBase64());
+  return res;
+}
+
+QPixmap  WhiteBoard::stringTopixmap( const QString& pic )
+{
+  QByteArray byte_array = QByteArray::fromBase64(pic.toLocal8Bit());
+  QPixmap pix;
+  QDataStream data_stream(&byte_array,QIODevice::ReadOnly);
+  data_stream>>pix;
+  return pix;
 }
 
 void WhiteBoard::contextMenuEvent(QContextMenuEvent *)  //右键菜单事件
@@ -469,6 +544,7 @@ void WhiteBoard::keyPressEvent(QKeyEvent *e) //按键事件
      //Ctrl+Z撤销
      if (e->key() == Qt::Key_Z && e->modifiers() == Qt::ControlModifier)
      {
+         qDebug()<<"撤销操作";
          if(_shape.size()>0)
          {
              switch(_shape.last())
@@ -481,9 +557,17 @@ void WhiteBoard::keyPressEvent(QKeyEvent *e) //按键事件
                          break;
                  case 4: _line.pop_back();
                          break;
+                 case 5:{
+                    _text.pop_back();
+                    _tpoint.pop_back();
+                    break;
+             }
+             default:
+                 break;
              }
              _shape.pop_back();
              _drag = 0;//设置为非拖拽模式
+             mySendTimer->sendUndo();
              update();
          }
      }
@@ -491,6 +575,155 @@ void WhiteBoard::keyPressEvent(QKeyEvent *e) //按键事件
      {
         SavePic();//Ctrl+S保存
      }
+}
+
+void WhiteBoard::remoteUndo(){
+    qDebug()<<"远程撤销操作";
+    if(_shape_remote.size()>0)
+    {
+        switch(_shape_remote.last())
+        {
+            case 1: _lines_remote.pop_back();
+                    break;
+            case 2: _rects_remote.pop_back();
+                    break;
+            case 3: _ellipse_remote.pop_back();
+                    break;
+            case 4: _line_remote.pop_back();
+                    break;
+            case 5:{
+                    _text_remote.pop_back();
+                    _tpoint_remote.pop_back();
+                    break;
+                }
+        default:
+            break;
+        }
+        _shape_remote.pop_back();
+        update();
+    }
+}
+
+void WhiteBoard::remoteLinesAppend(bool isNewLine, double x, double y){
+    if(isNewLine){
+        QVector<QPoint> line;//接受到新的线条
+        _lines_remote.append(line);//将新线条添加到线条集合
+        QVector<QPoint>& lastLine = _lines_remote.last();//拿到新线条
+        QPoint p;
+        p.setX(x*this->height());
+        p.setY(y*this->height());
+        lastLine.append(p);//记录鼠标的坐标(新线条的开始坐标)
+        _shape_remote.append(1);
+
+    }
+    else{
+        if(_lines_remote.size()<=0) return;//线条集合为空，不画线
+            QVector<QPoint>& lastLine = _lines_remote.last();//最后添加的线条，就是最新画的
+            QPoint p;
+            p.setX(x*this->height());
+            p.setY(y*this->height());
+            lastLine.append(p);//记录鼠标的坐标(线条的轨迹)
+            update();
+    }
+}
+
+void WhiteBoard::remoteRectsAppend(bool isNewRect, double x, double y){
+    if(isNewRect){
+        QRect rect;//鼠标按下，矩形开始
+        _rects_remote.append(rect);//将新矩形添加到矩形集合
+        QRect& lastRect = _rects_remote.last();//拿到新矩形
+        QPoint p;
+        p.setX(x*this->height());
+        p.setY(y*this->height());
+        lastRect.setTopLeft(p);//记录鼠标的坐标(新矩形的左上角坐标)
+        _shape_remote.append(2);
+    }
+    else{
+
+        QRect& lastRect = _rects_remote.last();//拿到新矩形
+        QPoint p;
+        p.setX(x*this->height());
+        p.setY(y*this->height());
+        lastRect.setBottomRight(p);//更新矩形的右下角坐标
+        update();
+
+    }
+
+}
+
+void WhiteBoard::remoteEllipseAppend(bool isNewEllipse, double x, double y){
+    if(isNewEllipse){
+        QRect rect;//鼠标按下，椭圆开始
+        _ellipse_remote.append(rect);//将新椭圆添加到椭圆集合
+        QRect& lastEllipse = _ellipse_remote.last();//拿到新椭圆
+        QPoint p;
+        p.setX(x*this->height());
+        p.setY(y*this->height());
+        lastEllipse.setTopLeft(p);//记录鼠标的坐标(新椭圆的左上角坐标)
+        _shape_remote.append(3);
+    }
+    else{
+        QRect& lastEllipse = _ellipse_remote.last();//拿到新椭圆
+        QPoint p;
+        p.setX(x*this->height());
+        p.setY(y*this->height());
+        lastEllipse.setBottomRight(p);//更新椭圆的右下角坐标)
+        update();
+    }
+}
+
+void WhiteBoard::remoteLineAppend(bool isNewLine, double x, double y){
+    if(isNewLine){
+        QRect rect;//鼠标按下，直线一端开始
+        _line_remote.append(rect);//将新直线添加到直线集合
+        QRect& lastLine = _line_remote.last();//拿到新直线
+        QPoint p;
+        p.setX(x*this->height());
+        p.setY(y*this->height());
+        lastLine.setTopLeft(p);//记录鼠标的坐标(新直线开始一端坐标)
+        _shape_remote.append(4);
+    }
+    else{
+        QRect& lastLine = _line_remote.last();//拿到新直线
+        QPoint p;
+        p.setX(x*this->height());
+        p.setY(y*this->height());
+        lastLine.setBottomRight(p);//更新直线另一端)
+        update();//触发窗体重绘
+    }
+}
+
+void WhiteBoard::remoteTextAppend(bool isNewText, double x, double y, QString text){
+    if(isNewText){
+        QPoint p;
+        p.setX(x*this->height());
+        p.setY(y*this->height());
+        _tpoint_remote.append(p);
+        _text_remote.append(text);
+        _shape_remote.append(5);
+    }
+    else{
+        QString& last = _text_remote.last();//拿到最后一个文本
+        last = text;//将输入框文本作为文本
+        update();
+    }
+}
+
+void WhiteBoard::remoteMove(int type, double dx, double dy){
+    qDebug()<<"收到移动操作";
+    if(type == 2){
+        QRect& lastRect = _rects_remote.last();//拿到最后添加的矩形
+        lastRect = lastRect.adjusted(dx*this->height(),dy*this->height(),dx*this->height(),dy*this->height());//更新矩形的位置
+        update();
+    }
+    else if(type ==3){
+        QRect& lastEllipse = _ellipse_remote.last();//拿到最后添加的矩形
+        lastEllipse = lastEllipse.adjusted(dx*this->height(),dy*this->height(),dx*this->height(),dy*this->height());
+        update();
+    }
+    else{
+        qDebug()<<"收到不正确type的move";
+    }
 }
 
 WhiteBoard::~WhiteBoard()

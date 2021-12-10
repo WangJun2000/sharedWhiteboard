@@ -60,14 +60,34 @@ private:
     QTextEdit *_tEdit;//文本输入框
 public:
     QVector<QVector<QPoint> > _lines;//线条集合(一条线条可包含多个线段)
+    QVector<QVector<QPoint> > _lines_remote;//线条集合(一条线条可包含多个线段)
     QVector<QRect> _rects;//矩形集合
+    QVector<QRect> _rects_remote;//矩形集合
     QVector<QRect> _ellipse;//椭圆集合
+    QVector<QRect> _ellipse_remote;//椭圆集合
     QVector<QRect>  _line;//直线集合
+    QVector<QRect>  _line_remote;//直线集合
     QVector<QString>  _text;//文字集合
+    QVector<QString>  _text_remote;//文字集合
     QVector<QPoint>  _tpoint;//文字位置集合
+    QVector<QPoint>  _tpoint_remote;//文字位置集合
     QVector<int>  _shape;//图形类型集合，用于撤回功能
+    QVector<int>  _shape_remote;//图形类型集合，用于撤回功能
     QPoint _begin;//鼠标按下坐标、用于最后一个图形移动
+    QPoint _begin_remote;//鼠标按下坐标、用于最后一个图形移动
 signals:
+
+public:
+    void remoteLinesAppend(bool isNewLine, double x, double y);
+    void remoteRectsAppend(bool isNewRect, double x, double y);
+    void remoteEllipseAppend(bool isNewEllipse, double x, double y);
+    void remoteLineAppend(bool isNewLine, double x, double y);
+    void remoteTextAppend(bool isNewText, double x, double y, QString text);
+    void remoteUndo();
+    void remoteMove(int type, double dx, double dy);
+    void remoteOpenpic(QString pic);
+    QString pixmapTostring( const QPixmap& pixmap );
+    QPixmap stringTopixmap( const QString& pic );
 
 public slots:
     void Lines();//铅笔画线
