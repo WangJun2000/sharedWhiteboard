@@ -22,6 +22,8 @@ WhiteBoard::WhiteBoard(QWidget *parent, QTcpSocket *_myTcpSocket) :
     _openflag = 0;//初始不打开图片
     _tEdit = new QTextEdit(this);//初始化文本输入框
     _tEdit->hide();//隐藏
+    _color=0;//当前画笔默认黑色(_color代表_colors中的颜色序号)
+    _size=1;//当前画笔默认粗细(_size代表_sizes中的粗细序号)
     this->setFocusPolicy(Qt::StrongFocus);
 
     //获取设备分辨率
@@ -84,6 +86,10 @@ WhiteBoard::WhiteBoard(QWidget *parent, QTcpSocket *_myTcpSocket) :
     textAction->setIcon(QIcon(":/png/images/texts.png"));//图标
     textAction->setShortcut(QKeySequence(tr("Ctrl+T")));//热键
     tbar->addAction(textAction);
+
+    //橡皮擦功能
+    QAction *eraseAction = new QAction(tr("&橡皮"), this);//橡皮擦动作
+
 
     //连接信号与槽函数
     connect(linesAction, SIGNAL(triggered()), this, SLOT(Lines()));
@@ -162,7 +168,11 @@ void WhiteBoard::paintEvent(QPaintEvent *)
 
     for(int c = 0;c<_shape.size();++c)//控制用户当前所绘图形总数
     {
-        if(_shape.at(c) == 1)//线条
+        if(_shape.at(c) == 6){
+            p.setPen(QPen(Qt::white,_shape_size.at(c));
+        }
+        else p.setPen(QPen(_colors.at(_shape_colors.at(c)),_shape_size.at(c));
+        if(_shape.at(c) == 1 && _shape.at(c) == 6 )//线条或者橡皮擦
         {
               const QVector<QPoint>& line = _lines.at(i1++);//取出一条线条
               for(int j=0; j<line.size()-1; ++j)//将线条的所有线段描绘出
@@ -193,7 +203,11 @@ void WhiteBoard::paintEvent(QPaintEvent *)
 
     for(int c_rt = 0;c_rt<_shape_remote.size();++c_rt)//控制远程用户当前所绘图形总数
     {
-        if(_shape_remote.at(c_rt) == 1)//线条
+        if(_shape_remote.at(c_rt) == 6){
+            p.setPen(QPen(Qt::white,_shape_size_remote.at(c_rt));
+        }
+        else p.setPen(QPen(_colors.at(_shape_colors_remote.at(c_rt)),_shape_size_remote.at(c_rt));
+        if(_shape_remote.at(c_rt) == 1 || _shape_remote.at(c_rt) == 6)//线条
         {
               const QVector<QPoint>& line = _lines_remote.at(i1_rt++);//取出一条线条
               for(int j=0; j<line.size()-1; ++j)//将线条的所有线段描绘出
@@ -229,7 +243,7 @@ void WhiteBoard::mousePressEvent(QMouseEvent *e)
 {
     if(e->button() == Qt::LeftButton)//当鼠标左键按下
     {
-        if(_drawType == 1)//线条(铅笔)
+        if(_drawType == 1 || _drawType == 6)//线条(铅笔)
         {
             _lpress = true;//左键按下标志
             QVector<QPoint> line;//鼠标按下，新的线条开始
@@ -238,6 +252,8 @@ void WhiteBoard::mousePressEvent(QMouseEvent *e)
             lastLine.append(e->pos());//记录鼠标的坐标(新线条的开始坐标)
             mySendTimer->sendLines(true,e->pos().x()/(double)this->height(),e->pos().y()/(double)this->height());
             _shape.append(1);
+            _shape_colors.append(_color);
+            _shape_size.append(_size);
 
         }
         else if(_drawType == 2)//矩形
@@ -250,7 +266,9 @@ void WhiteBoard::mousePressEvent(QMouseEvent *e)
                 QRect& lastRect = _rects.last();//拿到新矩形
                 lastRect.setTopLeft(e->pos());//记录鼠标的坐标(新矩形的左上角坐标)
                 mySendTimer->sendRects(true,e->pos().x()/(double)this->height(),e->pos().y()/(double)this->height());
-                 _shape.append(2);
+                _shape.append(2);
+                _shape_colors.append(_color);
+                _shape_size.append(_size);
             }
             else if(_rects.last().contains(e->pos()))//拖拽模式、如果在矩形内按下
             {
@@ -269,7 +287,9 @@ void WhiteBoard::mousePressEvent(QMouseEvent *e)
                 QRect& lastEllipse = _ellipse.last();//拿到新椭圆
                 lastEllipse.setTopLeft(e->pos());//记录鼠标的坐标(新椭圆的左上角坐标)
                 mySendTimer->sendEllipse(true,e->pos().x()/(double)this->height(),e->pos().y()/(double)this->height());
-                 _shape.append(3);
+                _shape.append(3);
+                _shape_colors.append(_color);
+                _shape_size.append(_size);
             }
             else if(_ellipse.last().contains(e->pos()))//如果在椭圆内按下
             {
@@ -286,6 +306,8 @@ void WhiteBoard::mousePressEvent(QMouseEvent *e)
             lastLine.setTopLeft(e->pos());//记录鼠标的坐标(新直线开始一端坐标)
             mySendTimer->sendLine(true,e->pos().x()/(double)this->height(),e->pos().y()/(double)this->height());
             _shape.append(4);
+            _shape_colors.append(_color);
+            _shape_size.append(_size);
         }
         else if(_drawType == 5)//文字
         {
@@ -301,6 +323,8 @@ void WhiteBoard::mousePressEvent(QMouseEvent *e)
             mySendTimer->sendText(true,lastp.x()/(double)this->height(),lastp.y()/(double)this->height(),"");
             _tEdit->clear();//因为全局只有一个，所以使用之前要清空
             _shape.append(5);
+            _shape_colors.append(_color);
+            _shape_size.append(_size);
         }
 
     }
@@ -328,7 +352,7 @@ void WhiteBoard::mouseMoveEvent(QMouseEvent *e)
 
     if(_lpress)
     {
-        if(_drawType == 1)//铅笔画线
+        if(_drawType == 1 || _drawType == 6)//铅笔画线或者橡皮擦
         {
             if(_lines.size()<=0) return;//线条集合为空，不画线
             QVector<QPoint>& lastLine = _lines.last();//最后添加的线条，就是最新画的
@@ -400,7 +424,7 @@ void WhiteBoard::mouseReleaseEvent(QMouseEvent *e)
 {
     if(_lpress)
     {
-        if(_drawType == 1)
+        if(_drawType == 1 || _drawType == 6)
         {
             QVector<QPoint>& lastLine = _lines.last();//最后添加的线条，就是最新画的
             lastLine.append(e->pos());//记录线条的结束坐标
@@ -471,6 +495,11 @@ void WhiteBoard::Ellipses()
 void WhiteBoard::Texts()
 {
     _drawType = 5;//文字
+}
+
+void WhiteBoard::Erase()
+{
+    _drawType = 6;//橡皮擦
 }
 
 void WhiteBoard::SavePic()
@@ -551,6 +580,8 @@ void WhiteBoard::keyPressEvent(QKeyEvent *e) //按键事件
              {
                  case 1: _lines.pop_back();
                          break;
+                 case 6: _lines.pop_back();
+                         break;
                  case 2: _rects.pop_back();
                          break;
                  case 3: _ellipse.pop_back();
@@ -584,6 +615,8 @@ void WhiteBoard::remoteUndo(){
         switch(_shape_remote.last())
         {
             case 1: _lines_remote.pop_back();
+                    break;
+            case 6: _lines.pop_back();
                     break;
             case 2: _rects_remote.pop_back();
                     break;
