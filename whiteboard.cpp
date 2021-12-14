@@ -251,7 +251,8 @@ void WhiteBoard::mousePressEvent(QMouseEvent *e)
             QVector<QPoint>& lastLine = _lines.last();//拿到新线条
             lastLine.append(e->pos());//记录鼠标的坐标(新线条的开始坐标)
             mySendTimer->sendLines(true,e->pos().x()/(double)this->height(),e->pos().y()/(double)this->height());
-            _shape.append(1);
+            if(_drawType == 1) _shape.append(1);
+            else _shape.append(6);
             _shape_colors.append(_color);
             _shape_size.append(_size);
 
