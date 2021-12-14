@@ -89,11 +89,11 @@ public:
 signals:
 
 public:
-    void remoteLinesAppend(bool isNewLine, double x, double y);
-    void remoteRectsAppend(bool isNewRect, double x, double y);
-    void remoteEllipseAppend(bool isNewEllipse, double x, double y);
-    void remoteLineAppend(bool isNewLine, double x, double y);
-    void remoteTextAppend(bool isNewText, double x, double y, QString text);
+    void remoteLinesAppend(bool isEraser, bool isNewLine, double x, double y, int color, int size);
+    void remoteRectsAppend(bool isNewRect, double x, double y, int color, int size);
+    void remoteEllipseAppend(bool isNewEllipse, double x, double y, int color, int size);
+    void remoteLineAppend(bool isNewLine, double x, double y, int color, int size);
+    void remoteTextAppend(bool isNewText, double x, double y, QString text, int color, int size);
     void remoteUndo();
     void remoteMove(int type, double dx, double dy);
     void remoteOpenpic(QString pic);

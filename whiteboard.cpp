@@ -169,10 +169,10 @@ void WhiteBoard::paintEvent(QPaintEvent *)
     for(int c = 0;c<_shape.size();++c)//控制用户当前所绘图形总数
     {
         if(_shape.at(c) == 6){
-            p.setPen(QPen(Qt::white,_shape_size.at(c));
+            p.setPen(QPen(Qt::white,_shape_size.at(c)));
         }
-        else p.setPen(QPen(_colors.at(_shape_colors.at(c)),_shape_size.at(c));
-        if(_shape.at(c) == 1 && _shape.at(c) == 6 )//线条或者橡皮擦
+        else p.setPen(QPen(_colors.at(_shape_colors.at(c)),_shape_size.at(c)));
+        if(_shape.at(c) == 1 || _shape.at(c) == 6 )//线条或者橡皮擦
         {
               const QVector<QPoint>& line = _lines.at(i1++);//取出一条线条
               for(int j=0; j<line.size()-1; ++j)//将线条的所有线段描绘出
@@ -204,9 +204,9 @@ void WhiteBoard::paintEvent(QPaintEvent *)
     for(int c_rt = 0;c_rt<_shape_remote.size();++c_rt)//控制远程用户当前所绘图形总数
     {
         if(_shape_remote.at(c_rt) == 6){
-            p.setPen(QPen(Qt::white,_shape_size_remote.at(c_rt));
+            p.setPen(QPen(Qt::white,_shape_size_remote.at(c_rt)));
         }
-        else p.setPen(QPen(_colors.at(_shape_colors_remote.at(c_rt)),_shape_size_remote.at(c_rt));
+        else p.setPen(QPen(_colors.at(_shape_colors_remote.at(c_rt)),_shape_size_remote.at(c_rt)));
         if(_shape_remote.at(c_rt) == 1 || _shape_remote.at(c_rt) == 6)//线条
         {
               const QVector<QPoint>& line = _lines_remote.at(i1_rt++);//取出一条线条
@@ -250,9 +250,14 @@ void WhiteBoard::mousePressEvent(QMouseEvent *e)
             _lines.append(line);//将新线条添加到线条集合
             QVector<QPoint>& lastLine = _lines.last();//拿到新线条
             lastLine.append(e->pos());//记录鼠标的坐标(新线条的开始坐标)
-            mySendTimer->sendLines(true,e->pos().x()/(double)this->height(),e->pos().y()/(double)this->height());
-            if(_drawType == 1) _shape.append(1);
-            else _shape.append(6);
+            if(_drawType == 1){
+                _shape.append(1);
+                mySendTimer->sendLines(false,true,e->pos().x()/(double)this->height(),e->pos().y()/(double)this->height(),_color,_size);
+            }
+            else{
+                _shape.append(6);
+                mySendTimer->sendLines(true,true,e->pos().x()/(double)this->height(),e->pos().y()/(double)this->height(),_color,_size);
+            }
             _shape_colors.append(_color);
             _shape_size.append(_size);
 
@@ -266,7 +271,7 @@ void WhiteBoard::mousePressEvent(QMouseEvent *e)
                 _rects.append(rect);//将新矩形添加到矩形集合
                 QRect& lastRect = _rects.last();//拿到新矩形
                 lastRect.setTopLeft(e->pos());//记录鼠标的坐标(新矩形的左上角坐标)
-                mySendTimer->sendRects(true,e->pos().x()/(double)this->height(),e->pos().y()/(double)this->height());
+                mySendTimer->sendRects(true,e->pos().x()/(double)this->height(),e->pos().y()/(double)this->height(), _color, _size);
                 _shape.append(2);
                 _shape_colors.append(_color);
                 _shape_size.append(_size);
@@ -287,7 +292,7 @@ void WhiteBoard::mousePressEvent(QMouseEvent *e)
                 _ellipse.append(rect);//将新椭圆添加到椭圆集合
                 QRect& lastEllipse = _ellipse.last();//拿到新椭圆
                 lastEllipse.setTopLeft(e->pos());//记录鼠标的坐标(新椭圆的左上角坐标)
-                mySendTimer->sendEllipse(true,e->pos().x()/(double)this->height(),e->pos().y()/(double)this->height());
+                mySendTimer->sendEllipse(true,e->pos().x()/(double)this->height(),e->pos().y()/(double)this->height(), _color, _size);
                 _shape.append(3);
                 _shape_colors.append(_color);
                 _shape_size.append(_size);
@@ -305,7 +310,7 @@ void WhiteBoard::mousePressEvent(QMouseEvent *e)
             _line.append(rect);//将新直线添加到直线集合
             QRect& lastLine = _line.last();//拿到新直线
             lastLine.setTopLeft(e->pos());//记录鼠标的坐标(新直线开始一端坐标)
-            mySendTimer->sendLine(true,e->pos().x()/(double)this->height(),e->pos().y()/(double)this->height());
+            mySendTimer->sendLine(true,e->pos().x()/(double)this->height(),e->pos().y()/(double)this->height(), _color, _size);
             _shape.append(4);
             _shape_colors.append(_color);
             _shape_size.append(_size);
@@ -321,7 +326,7 @@ void WhiteBoard::mousePressEvent(QMouseEvent *e)
 
             _tEdit->show();//显示文本输入框
             _text.append("");//添加文本到文本集合
-            mySendTimer->sendText(true,lastp.x()/(double)this->height(),lastp.y()/(double)this->height(),"");
+            mySendTimer->sendText(true,lastp.x()/(double)this->height(),lastp.y()/(double)this->height(),"", _color, _size);
             _tEdit->clear();//因为全局只有一个，所以使用之前要清空
             _shape.append(5);
             _shape_colors.append(_color);
@@ -429,6 +434,7 @@ void WhiteBoard::mouseReleaseEvent(QMouseEvent *e)
         {
             QVector<QPoint>& lastLine = _lines.last();//最后添加的线条，就是最新画的
             lastLine.append(e->pos());//记录线条的结束坐标
+            mySendTimer->sendLines(false,e->pos().x()/(double)this->height(),e->pos().y()/(double)this->height());
             _lpress = false;//标志左键释放
         }
         else if(_drawType == 2)
@@ -437,6 +443,7 @@ void WhiteBoard::mouseReleaseEvent(QMouseEvent *e)
             if(!_drag)
             {
                 lastRect.setBottomRight(e->pos());//不是拖拽时，更新矩形的右下角坐标)
+                mySendTimer->sendRects(false,e->pos().x()/(double)this->height(),e->pos().y()/(double)this->height());
                 //刚画完矩形，将光标设置到新矩形的中心位置，并进入拖拽模式
                 this->cursor().setPos(this->cursor().pos().x()-lastRect.width()/2,this->cursor().pos().y()-lastRect.height()/2);
                 _drag = 1;
@@ -451,6 +458,7 @@ void WhiteBoard::mouseReleaseEvent(QMouseEvent *e)
             if(!_drag)
             {
                 lastEllipse.setBottomRight(e->pos());//不是拖拽时，更新椭圆的右下角坐标)
+                mySendTimer->sendEllipse(false,e->pos().x()/(double)this->height(),e->pos().y()/(double)this->height());
                 //刚画完椭圆，将光标设置到新椭圆的中心位置，并进入拖拽模式
                 this->cursor().setPos(this->cursor().pos().x()-lastEllipse.width()/2,this->cursor().pos().y()-lastEllipse.height()/2);
                 _drag = 1;
@@ -462,6 +470,7 @@ void WhiteBoard::mouseReleaseEvent(QMouseEvent *e)
         {
             QRect& lastLine = _line.last();//拿到新矩形
             lastLine.setBottomRight(e->pos());//更新矩形的右下角坐标)
+            mySendTimer->sendLine(false,e->pos().x()/(double)this->height(),e->pos().y()/(double)this->height());
             _lpress = false;
 
         }
@@ -638,7 +647,7 @@ void WhiteBoard::remoteUndo(){
     }
 }
 
-void WhiteBoard::remoteLinesAppend(bool isNewLine, double x, double y){
+void WhiteBoard::remoteLinesAppend(bool isEraser, bool isNewLine, double x, double y, int color ,int size){
     if(isNewLine){
         QVector<QPoint> line;//接受到新的线条
         _lines_remote.append(line);//将新线条添加到线条集合
@@ -647,7 +656,10 @@ void WhiteBoard::remoteLinesAppend(bool isNewLine, double x, double y){
         p.setX(x*this->height());
         p.setY(y*this->height());
         lastLine.append(p);//记录鼠标的坐标(新线条的开始坐标)
-        _shape_remote.append(1);
+        if (!isEraser) _shape_remote.append(1);
+        else _shape_remote.append(6);
+        _shape_colors_remote.append(color);
+        _shape_size_remote.append(size);
 
     }
     else{
@@ -661,7 +673,7 @@ void WhiteBoard::remoteLinesAppend(bool isNewLine, double x, double y){
     }
 }
 
-void WhiteBoard::remoteRectsAppend(bool isNewRect, double x, double y){
+void WhiteBoard::remoteRectsAppend(bool isNewRect, double x, double y, int color, int size){
     if(isNewRect){
         QRect rect;//鼠标按下，矩形开始
         _rects_remote.append(rect);//将新矩形添加到矩形集合
@@ -671,6 +683,8 @@ void WhiteBoard::remoteRectsAppend(bool isNewRect, double x, double y){
         p.setY(y*this->height());
         lastRect.setTopLeft(p);//记录鼠标的坐标(新矩形的左上角坐标)
         _shape_remote.append(2);
+        _shape_colors_remote.append(color);
+        _shape_size_remote.append(size);
     }
     else{
 
@@ -685,7 +699,7 @@ void WhiteBoard::remoteRectsAppend(bool isNewRect, double x, double y){
 
 }
 
-void WhiteBoard::remoteEllipseAppend(bool isNewEllipse, double x, double y){
+void WhiteBoard::remoteEllipseAppend(bool isNewEllipse, double x, double y, int color, int size){
     if(isNewEllipse){
         QRect rect;//鼠标按下，椭圆开始
         _ellipse_remote.append(rect);//将新椭圆添加到椭圆集合
@@ -695,6 +709,8 @@ void WhiteBoard::remoteEllipseAppend(bool isNewEllipse, double x, double y){
         p.setY(y*this->height());
         lastEllipse.setTopLeft(p);//记录鼠标的坐标(新椭圆的左上角坐标)
         _shape_remote.append(3);
+        _shape_colors_remote.append(color);
+        _shape_size_remote.append(size);
     }
     else{
         QRect& lastEllipse = _ellipse_remote.last();//拿到新椭圆
@@ -706,7 +722,7 @@ void WhiteBoard::remoteEllipseAppend(bool isNewEllipse, double x, double y){
     }
 }
 
-void WhiteBoard::remoteLineAppend(bool isNewLine, double x, double y){
+void WhiteBoard::remoteLineAppend(bool isNewLine, double x, double y, int color, int size){
     if(isNewLine){
         QRect rect;//鼠标按下，直线一端开始
         _line_remote.append(rect);//将新直线添加到直线集合
@@ -716,6 +732,8 @@ void WhiteBoard::remoteLineAppend(bool isNewLine, double x, double y){
         p.setY(y*this->height());
         lastLine.setTopLeft(p);//记录鼠标的坐标(新直线开始一端坐标)
         _shape_remote.append(4);
+        _shape_colors_remote.append(color);
+        _shape_size_remote.append(size);
     }
     else{
         QRect& lastLine = _line_remote.last();//拿到新直线
@@ -727,7 +745,7 @@ void WhiteBoard::remoteLineAppend(bool isNewLine, double x, double y){
     }
 }
 
-void WhiteBoard::remoteTextAppend(bool isNewText, double x, double y, QString text){
+void WhiteBoard::remoteTextAppend(bool isNewText, double x, double y, QString text, int color, int size){
     if(isNewText){
         QPoint p;
         p.setX(x*this->height());
@@ -735,6 +753,8 @@ void WhiteBoard::remoteTextAppend(bool isNewText, double x, double y, QString te
         _tpoint_remote.append(p);
         _text_remote.append(text);
         _shape_remote.append(5);
+        _shape_colors_remote.append(color);
+        _shape_size_remote.append(size);
     }
     else{
         QString& last = _text_remote.last();//拿到最后一个文本

@@ -21,10 +21,15 @@ public:
 
     void sendMsg(QString msg);
     void sendLines(bool isNewLine,double x, double y);
-    void sendRects(bool isNewRect,double x,double y);
-    void sendEllipse(bool isNewEllipse,double x,double y);
-    void sendLine(bool isNewLine,double x,double y);
-    void sendText(bool isNewText,double x, double y,QString text);
+    void sendLines(bool isEraser, bool isNewLine, double x, double y, int color, int size);
+    void sendRects(bool isNewRect,double x, double y);
+    void sendRects(bool isNewRect,double x, double y, int color, int size);
+    void sendEllipse(bool isNewEllipse, double x,double y);
+    void sendEllipse(bool isNewEllipse, double x,double y, int color, int size);
+    void sendLine(bool isNewLine, double x,double y);
+    void sendLine(bool isNewLine, double x,double y, int color, int size);
+    void sendText(bool isNewText, double x, double y, QString text);
+    void sendText(bool isNewText, double x, double y, QString text, int color, int size);
     void sendUndo();
     void sendMove(int type, double dx, double dy);
     void sendPic(QString pic);

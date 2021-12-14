@@ -104,7 +104,10 @@ void ReceiveOption::handleJson(QJsonObject comeJson){
                     for (int i=0; i<lineArray.size(); i++){
                         QJsonObject point = lineArray[i].toObject();
                         //qDebug()<<point;
-                        myWhiteBoard->remoteLinesAppend(point.value("isNewLine").toBool(),point.value("x").toDouble(),point.value("y").toDouble());
+                        bool isEraser = point.contains("isEraser") ? point.value("isEraser").toBool() : false;
+                        int color = point.contains("color") ? point.value("color").toInt() : 0;
+                        int size = point.contains("size") ? point.value("size").toInt() : 1;
+                        myWhiteBoard->remoteLinesAppend(isEraser,point.value("isNewLine").toBool(),point.value("x").toDouble(),point.value("y").toDouble(), color, size);
 
                     }
                 }
@@ -120,7 +123,9 @@ void ReceiveOption::handleJson(QJsonObject comeJson){
                     for (int i=0; i<rectArray.size(); i++){
                         QJsonObject point = rectArray[i].toObject();
                         //qDebug()<<point;
-                        myWhiteBoard->remoteRectsAppend(point.value("isNewRect").toBool(),point.value("x").toDouble(),point.value("y").toDouble());
+                        int color = point.contains("color") ? point.value("color").toInt() : 0;
+                        int size = point.contains("size") ? point.value("size").toInt() : 1;
+                        myWhiteBoard->remoteRectsAppend(point.value("isNewRect").toBool(),point.value("x").toDouble(),point.value("y").toDouble(), color, size);
 
                     }
                 }
@@ -137,7 +142,9 @@ void ReceiveOption::handleJson(QJsonObject comeJson){
                     for (int i=0; i<ellipseArray.size(); i++){
                         QJsonObject point = ellipseArray[i].toObject();
                         //qDebug()<<point;
-                        myWhiteBoard->remoteEllipseAppend(point.value("isNewEllipse").toBool(),point.value("x").toDouble(),point.value("y").toDouble());
+                        int color = point.contains("color") ? point.value("color").toInt() : 0;
+                        int size = point.contains("size") ? point.value("size").toInt() : 1;
+                        myWhiteBoard->remoteEllipseAppend(point.value("isNewEllipse").toBool(),point.value("x").toDouble(),point.value("y").toDouble(), color, size);
 
                     }
                 }
@@ -154,7 +161,9 @@ void ReceiveOption::handleJson(QJsonObject comeJson){
                     for (int i=0; i<lineArray.size(); i++){
                         QJsonObject point = lineArray[i].toObject();
                         //qDebug()<<point;
-                        myWhiteBoard->remoteLineAppend(point.value("isNewLine").toBool(),point.value("x").toDouble(),point.value("y").toDouble());
+                        int color = point.contains("color") ? point.value("color").toInt() : 0;
+                        int size = point.contains("size") ? point.value("size").toInt() : 1;
+                        myWhiteBoard->remoteLineAppend(point.value("isNewLine").toBool(),point.value("x").toDouble(),point.value("y").toDouble(), color, size);
 
                     }
                 }
@@ -171,7 +180,9 @@ void ReceiveOption::handleJson(QJsonObject comeJson){
                     for (int i=0; i<lineArray.size(); i++){
                         QJsonObject point = lineArray[i].toObject();
                         //qDebug()<<point;
-                        myWhiteBoard->remoteTextAppend(point.value("isNewText").toBool(),point.value("x").toDouble(),point.value("y").toDouble(),point.value("text").toString());
+                        int color = point.contains("color") ? point.value("color").toInt() : 0;
+                        int size = point.contains("size") ? point.value("size").toInt() : 1;
+                        myWhiteBoard->remoteTextAppend(point.value("isNewText").toBool(),point.value("x").toDouble(),point.value("y").toDouble(),point.value("text").toString(), color, size);
 
                     }
                 }
