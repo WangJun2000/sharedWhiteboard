@@ -83,7 +83,7 @@ public:
     QVector<int> _shape_size_remote;//各个图形线条粗细集合
 
     const QVector<QColor> _colors={QColor(0,0,0),QColor(255,0,0),QColor(0,255,0),QColor(0,0,255),\
-    QColor(255,255,0),QColor(255,0,255),QColor(0,255,255),QColor(255,255,255)};//颜色集合
+    QColor(255,255,0),QColor(255,0,255),QColor(0,255,255),QColoAr(255,255,255)};//颜色集合
     const QVector<int> _sizes={1,2,3,4,5};//画线粗细集合
 
 signals:
@@ -110,6 +110,21 @@ public slots:
     void Texts();//文字
     void AddTexts();//添加文字
     void Erase();//橡皮擦
+
+    void Color0();//黑色
+    void Color1();//红色
+    void Color2();//绿色
+    void Color3();//蓝色
+    void Color4();//黄色
+    void Color5();//洋红色
+    void Color6();//青色
+    void Color7();//白色
+
+    void Size0();
+    void Size1();
+    void Size2();
+    void Size3();
+    void Size4();
 };
 
 #endif // WHITEBOARD_H

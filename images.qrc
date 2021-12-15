@@ -9,5 +9,19 @@
         <file>images/save.png</file>
         <file>images/saveas.png</file>
         <file>images/texts.png</file>
+        <file>images/color0.png</file>
+        <file>images/color1.png</file>
+        <file>images/color2.png</file>
+        <file>images/color3.png</file>
+        <file>images/color4.png</file>
+        <file>images/color5.png</file>
+        <file>images/color6.png</file>
+        <file>images/color7.png</file>
+        <file>images/eraser.png</file>
+        <file>images/size0.png</file>
+        <file>images/size1.png</file>
+        <file>images/size2.png</file>
+        <file>images/size3.png</file>
+        <file>images/size4.png</file>
     </qresource>
 </RCC>

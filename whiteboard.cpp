@@ -89,7 +89,73 @@ WhiteBoard::WhiteBoard(QWidget *parent, QTcpSocket *_myTcpSocket) :
 
     //橡皮擦功能
     QAction *eraseAction = new QAction(tr("&橡皮"), this);//橡皮擦动作
+    eraseAction->setIcon(QIcon(":/png/images/eraser.png"));//图标
+    eraseAction->setShortcut(QKeySequence(tr("Ctrl+Y")));//热键
+    tbar->addAction(eraseAction);
 
+    //创建颜色选择工具栏
+    QToolBar *tbar_color = addToolBar(tr("颜色工具栏"));
+    tbar_color->setMovable(false);//工具栏不可移动
+    tbar_color->setIconSize(QSize(16, 16));//设置动作图标的尺寸
+    tbar_color->setStyleSheet("background-color:rgb(199,237,204)");//背景色
+
+    QAction *color0Action = new QAction(tr("&黑色"), this);//黑色
+    color0Action->setIcon(QIcon(":/png/images/color0.png"));//图标
+    tbar_color->addAction(color0Action);
+
+    QAction *color1Action = new QAction(tr("&红色"), this);//红色
+    color1Action->setIcon(QIcon(":/png/images/color1.png"));//图标
+    tbar_color->addAction(color1Action);
+
+    QAction *color2Action = new QAction(tr("&绿色"), this);//绿色
+    color2Action->setIcon(QIcon(":/png/images/color2.png"));//图标
+    tbar_color->addAction(color2Action);
+
+    QAction *color3Action = new QAction(tr("&蓝色"), this);//蓝色
+    color3Action->setIcon(QIcon(":/png/images/color3.png"));//图标
+    tbar_color->addAction(color3Action);
+
+    QAction *color4Action = new QAction(tr("&黄色"), this);//黄色
+    color4Action->setIcon(QIcon(":/png/images/color4.png"));//图标
+    tbar_color->addAction(color4Action);
+
+    QAction *color5Action = new QAction(tr("&洋红色"), this);//洋红色
+    color5Action->setIcon(QIcon(":/png/images/color5.png"));//图标
+    tbar_color->addAction(color5Action);
+
+    QAction *color6Action = new QAction(tr("&青色"), this);//青色
+    color6Action->setIcon(QIcon(":/png/images/color6.png"));//图标
+    tbar_color->addAction(color6Action);
+
+    QAction *color7Action = new QAction(tr("&白色"), this);//白色
+    color7Action->setIcon(QIcon(":/png/images/color7.png"));//图标
+    tbar_color->addAction(color7Action);
+
+    //创建线条粗细选择工具栏
+    QToolBar *tbar_size = addToolBar(tr("线条粗细工具栏"));
+    tbar_size->setMovable(false);//工具栏不可移动
+    tbar_size->setIconSize(QSize(16, 16));//设置动作图标的尺寸
+    tbar_size->setStyleSheet("background-color:rgb(199,237,204)");//背景色
+
+    QAction *size0Action = new QAction(tr("&粗细0"), this);//粗细0
+    size0Action->setIcon(QIcon(":/png/images/size0.png"));//图标
+    tbar_size->addAction(size0Action);
+
+    QAction *size1Action = new QAction(tr("&粗细1"), this);//粗细1
+    size1Action->setIcon(QIcon(":/png/images/size1.png"));//图标
+    tbar_size->addAction(size1Action);
+
+    QAction *size2Action = new QAction(tr("&粗细2"), this);//粗细2
+    size2Action->setIcon(QIcon(":/png/images/size2.png"));//图标
+    tbar_size->addAction(size2Action);
+
+    QAction *size3Action = new QAction(tr("&粗细3"), this);//粗细3
+    size3Action->setIcon(QIcon(":/png/images/size3.png"));//图标
+    tbar_size->addAction(size3Action);
+
+    QAction *size4Action = new QAction(tr("&粗细4"), this);//粗细4
+    size4Action->setIcon(QIcon(":/png/images/size4.png"));//图标
+    tbar_size->addAction(size4Action);
 
     //连接信号与槽函数
     connect(linesAction, SIGNAL(triggered()), this, SLOT(Lines()));
@@ -101,7 +167,22 @@ WhiteBoard::WhiteBoard(QWidget *parent, QTcpSocket *_myTcpSocket) :
     connect(openAction, SIGNAL(triggered()), this, SLOT(OpenPic()));
     connect(textAction, SIGNAL(triggered()), this, SLOT(Texts()));
     connect(_tEdit, SIGNAL(textChanged()), this, SLOT(AddTexts()));
+    connect(eraseAction, SIGNAL(triggered()), this, SLOT(Erase()));
 
+    connect(color0Action, SIGNAL(triggered()), this, SLOT(Color0()));
+    connect(color1Action, SIGNAL(triggered()), this, SLOT(Color1()));
+    connect(color2Action, SIGNAL(triggered()), this, SLOT(Color2()));
+    connect(color3Action, SIGNAL(triggered()), this, SLOT(Color3()));
+    connect(color4Action, SIGNAL(triggered()), this, SLOT(Color4()));
+    connect(color5Action, SIGNAL(triggered()), this, SLOT(Color5()));
+    connect(color6Action, SIGNAL(triggered()), this, SLOT(Color6()));
+    connect(color7Action, SIGNAL(triggered()), this, SLOT(Color7()));
+
+    connect(size0Action, SIGNAL(triggered()), this, SLOT(Size0()));
+    connect(size1Action, SIGNAL(triggered()), this, SLOT(Size1()));
+    connect(size2Action, SIGNAL(triggered()), this, SLOT(Size2()));
+    connect(size3Action, SIGNAL(triggered()), this, SLOT(Size3()));
+    connect(size4Action, SIGNAL(triggered()), this, SLOT(Size4()));
 
     //创建聊天框
     msgBrowser = new QTextBrowser(this);
@@ -160,7 +241,7 @@ void WhiteBoard::paintEvent(QPaintEvent *)
     if(_openflag == 0)//不是打开图片的，每一次新建一个空白的画布
     {
         _pixmap = QPixmap(size());//新建pixmap
-        _pixmap.fill(Qt::white);//背景色填充为白色
+        _pixmap.fill(Qt::white);//背景色填充为白色A
     }
     QPixmap pix = _pixmap;//以_pixmap作为画布
     QPainter p(&pix);//将_pixmap作为画布
@@ -510,6 +591,74 @@ void WhiteBoard::Texts()
 void WhiteBoard::Erase()
 {
     _drawType = 6;//橡皮擦
+    _tEdit->hide();
+}
+
+//颜色设置
+void WhiteBoard::Color0()
+{
+    _color=0;//黑色
+}
+
+void WhiteBoard::Color1()
+{
+    _color=1;//红色
+}
+
+void WhiteBoard::Color2()
+{
+    _color=2;//绿色
+}
+
+void WhiteBoard::Color3()
+{
+    _color=3;//蓝色
+}
+
+void WhiteBoard::Color4()
+{
+    _color=4;//黄色
+}
+
+void WhiteBoard::Color5()
+{
+    _color=5;//洋红色
+}
+
+void WhiteBoard::Color6()
+{
+    _color=6;//青色
+}
+
+void WhiteBoard::Color7()
+{
+    _color=7;//白色
+}
+
+//线条粗细设置
+void WhiteBoard::Size0()
+{
+    _size=0;
+}
+
+void WhiteBoard::Size1()
+{
+    _size=1;
+}
+
+void WhiteBoard::Size2()
+{
+    _size=2;
+}
+
+void WhiteBoard::Size3()
+{
+    _size=3;
+}
+
+void WhiteBoard::Size4()
+{
+    _size=4;
 }
 
 void WhiteBoard::SavePic()
