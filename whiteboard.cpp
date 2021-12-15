@@ -250,9 +250,9 @@ void WhiteBoard::paintEvent(QPaintEvent *)
     for(int c = 0;c<_shape.size();++c)//控制用户当前所绘图形总数
     {
         if(_shape.at(c) == 6){
-            p.setPen(QPen(Qt::white,_shape_size.at(c)));
+            p.setPen(QPen(Qt::white,_sizes.at(_shape_size.at(c))));
         }
-        else p.setPen(QPen(_colors.at(_shape_colors.at(c)),_shape_size.at(c)));
+        else p.setPen(QPen(_colors.at(_shape_colors.at(c)),_sizes.at(_shape_size.at(c))));
         if(_shape.at(c) == 1 || _shape.at(c) == 6 )//线条或者橡皮擦
         {
               const QVector<QPoint>& line = _lines.at(i1++);//取出一条线条
@@ -285,9 +285,9 @@ void WhiteBoard::paintEvent(QPaintEvent *)
     for(int c_rt = 0;c_rt<_shape_remote.size();++c_rt)//控制远程用户当前所绘图形总数
     {
         if(_shape_remote.at(c_rt) == 6){
-            p.setPen(QPen(Qt::white,_shape_size_remote.at(c_rt)));
+            p.setPen(QPen(Qt::white,_sizes.at(_shape_size_remote.at(c_rt))));
         }
-        else p.setPen(QPen(_colors.at(_shape_colors_remote.at(c_rt)),_shape_size_remote.at(c_rt)));
+        else p.setPen(QPen(_colors.at(_shape_colors_remote.at(c_rt)),_sizes.at(_shape_size_remote.at(c_rt))));
         if(_shape_remote.at(c_rt) == 1 || _shape_remote.at(c_rt) == 6)//线条
         {
               const QVector<QPoint>& line = _lines_remote.at(i1_rt++);//取出一条线条
@@ -333,14 +333,15 @@ void WhiteBoard::mousePressEvent(QMouseEvent *e)
             lastLine.append(e->pos());//记录鼠标的坐标(新线条的开始坐标)
             if(_drawType == 1){
                 _shape.append(1);
+                _shape_size.append(_size);
                 mySendTimer->sendLines(false,true,e->pos().x()/(double)this->height(),e->pos().y()/(double)this->height(),_color,_size);
             }
             else{
                 _shape.append(6);
-                mySendTimer->sendLines(true,true,e->pos().x()/(double)this->height(),e->pos().y()/(double)this->height(),_color,_size);
+                _shape_size.append(5);
+                mySendTimer->sendLines(true,true,e->pos().x()/(double)this->height(),e->pos().y()/(double)this->height(),_color,5);
             }
             _shape_colors.append(_color);
-            _shape_size.append(_size);
 
         }
         else if(_drawType == 2)//矩形

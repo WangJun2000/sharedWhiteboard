@@ -84,7 +84,7 @@ public:
 
     const QVector<QColor> _colors={QColor(0,0,0),QColor(255,0,0),QColor(0,255,0),QColor(0,0,255),\
     QColor(255,255,0),QColor(255,0,255),QColor(0,255,255),QColor(255,255,255)};//颜色集合
-    const QVector<int> _sizes={1,2,3,4,5};//画线粗细集合
+    const QVector<int> _sizes={1,2,3,4,5,60};//画线粗细集合
 
 signals:
 
